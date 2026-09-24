@@ -24,24 +24,34 @@ def transform_order(order):
        "line_items": order["line_items"],
     }
 
-def test_hubspot_connection():
+def create_hubspot_contact(customer):
     load_dotenv()
     
     service_key = os.getenv("HUBSPOT_SERVICE_KEY")
     
     headers = {
-        "Authorization": f"Bearer {service_key}"
+       "Authorization": f"Bear {service_key}",
+       "Content-Type": "application/json",
     }
     
-    response = requests.get(
-        "https://api.hubapi.com/crm/v3/objects/contacts",
+    payload = {
+        "properties": customer
+    }
+    
+    response = requests.post(
+        "https://api.hubapi.com/crm/objects/2026-09/contacts",
         headers=headers,
-        params={"limit": 1},
+        json=payload,
         timeout=10,
     )
 
     print("HubSpot status code: ", response.status_code)
     print("HubSpot response: ", response.json())
+    
+    #Temporary diagnostic prints to investigate write failure
+    print("Request URL:", response.request.url)
+    print("Authorization header present:", "Authorization" in response.request.headers)
+    print("Request method:", response.request.method)
 
 def main():
     # Load the sample ecommerce data from JSON.
@@ -58,7 +68,7 @@ def main():
     print("Transformed customer: ",hubspot_customer)
     print("Transformed order: ",hubspot_order)
     
-    test_hubspot_connection()
+    create_hubspot_contact(hubspot_customer)
               
 if __name__ == "__main__":
     main()
