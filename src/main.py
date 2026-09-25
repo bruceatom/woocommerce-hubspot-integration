@@ -3,11 +3,17 @@ import os
 
 import requests
 from dotenv import load_dotenv
+from transforms import transform_customer, transform_order
 
+
+# ============================================================
+# 1. HUBSPOT CONFIGURATION AND AUTHENTICATION
+# ============================================================
 
 HUBSPOT_CONTACTS_URL = "https://api.hubapi.com/crm/objects/2026-09/contacts"
 
 
+# 1.1 Build authenticated HubSpot request headers
 def get_hubspot_headers():
     load_dotenv()
 
@@ -19,27 +25,11 @@ def get_hubspot_headers():
     }
 
 
-def transform_customer(customer):
-    return {
-        "firstname": customer["first_name"],
-        "lastname": customer["last_name"],
-        "email": customer["email"],
-        "phone": customer["phone"],
-    }
+# ============================================================
+# 2. HUBSPOT CONTACT OPERATIONS
+# ============================================================
 
-
-def transform_order(order):
-    return {
-        "woocommerce_order_id": order["id"],
-        "status": order["status"],
-        "currency": order["currency"],
-        "total": order["total"],
-        "billing_address": order["billing_address"],
-        "shipping_address": order["shipping_address"],
-        "line_items": order["line_items"],
-    }
-
-
+# 2.1 Find an existing Contact by email
 def find_hubspot_contact_by_email(email):
     headers = get_hubspot_headers()
 
@@ -59,6 +49,7 @@ def find_hubspot_contact_by_email(email):
     response.raise_for_status()
 
 
+# 2.2 Create a new Contact
 def create_hubspot_contact(customer):
     headers = get_hubspot_headers()
 
@@ -78,36 +69,51 @@ def create_hubspot_contact(customer):
     return response.json()
 
 
+# ============================================================
+# 3. INTEGRATION WORKFLOW
+# ============================================================
+
 def main():
+    # 3.1 Load source data
     with open("sample_data/order.json") as file:
         data = json.load(file)
 
+    # 3.2 Separate source business objects
     customer = data["customer"]
     order = data["order"]
 
+    # 3.3 Transform source data
     hubspot_customer = transform_customer(customer)
     hubspot_order = transform_order(order)
 
     print("Transformed customer:", hubspot_customer)
     print("Transformed order:", hubspot_order)
 
+    # 3.4 Find existing Contact
     existing_contact = find_hubspot_contact_by_email(
         hubspot_customer["email"]
     )
 
+    # 3.5 Reuse existing Contact or create a new Contact
     if existing_contact:
         print(
             "Existing HubSpot contact found:",
             existing_contact["id"],
         )
     else:
-        created_contact = create_hubspot_contact(hubspot_customer)
+        created_contact = create_hubspot_contact(
+            hubspot_customer
+        )
 
         print(
             "New HubSpot contact created:",
             created_contact["id"],
         )
 
+
+# ============================================================
+# 4. PROGRAM ENTRY POINT
+# ============================================================
 
 if __name__ == "__main__":
     main()
