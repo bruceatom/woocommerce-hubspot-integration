@@ -65,3 +65,55 @@ def create_hubspot_contact(customer):
     response.raise_for_status()
 
     return response.json()
+    
+# ==========================================================================
+# 3. HUBSPOT ORDER OPERATIONS
+# ==========================================================================
+
+HUBSPOT_ORDERS_URL = "https://api.hubspot.com/crm/objects/2026-09/orders"
+
+ORDER_PIPELINE_ID = "14a2e10e-5471-408a-906e-c51f3b04369e"
+
+OPEN_STAGE_ID = "4b27b500-f031-4927-9811-68a0b525cbae"
+
+# 3.1 Find an existing Order by external Order Id
+
+def find_hubspot_order_by_external_id(external_order_id):
+    headers = get_hubspot_headers()
+
+    response = requests.get(
+        HUBSPOT_ORDERS_URL,
+        headers=headers,
+        params={
+            "properties": "hs_external_order_id,hs_order_name",
+            "limit": 100,
+        },
+        timeout=10,
+    )
+
+    response.raise_for_status()
+
+    for order in response.json()["results"]:
+        if order["properties"].get("hs_external_order_id") == str(external_order_id):
+            return order
+
+    return None
+
+# 3.2 Create a new HubSpot Order
+
+def create_hubspot_order(order):
+    headers = get_hubspot_headers()
+    
+    payload = {
+        "properties": {
+           "hs_order_name": f"WooCommerce Order #{order['woocommerce_order_id']}",
+           "hs_external_order_id": str(order["woocommerce_order_id"]),
+           "hs_external_order_status": order["status"],
+           "hs_pipeline": ORDER_PIPELINE_ID,
+           "hs_pipeline_stage": OPEN_STAGE_ID,
+           "hs_total_price": order["total"],
+           "hs_currency_code": order["currency"],
+           }
+   }
+       
+

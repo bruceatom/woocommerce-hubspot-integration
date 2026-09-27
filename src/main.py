@@ -4,7 +4,9 @@ from transforms import transform_customer, transform_order
 
 from hubspot_client import (
     create_hubspot_contact,
+    create_hubspot_order,
     find_hubspot_contact_by_email,
+    find_hubspot_order_by_external_id,
 )
 
 
@@ -49,6 +51,23 @@ def main():
             created_contact["id"],
         )
 
+    # 1.6 Find existing Order
+    existing_order = find_hubspot_order_by_external_id(
+        hubspot_order["woocommerce_order_id"]
+    ) 
+    
+   # 1.7 Reuse existing Order or create a new Order
+    if existing_order:
+        print(
+            "Existing HubSpot Order found:",            existing_order["id"],
+        )
+    else:
+        created_order = create_hubspot_order(hubspot_order)
+
+        print(
+            "New HubSpot Order created:",
+            created_order["id"],
+        )
 
 # ============================================================
 # 2. PROGRAM ENTRY POINT
