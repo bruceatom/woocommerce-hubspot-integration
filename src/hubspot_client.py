@@ -130,7 +130,7 @@ def create_hubspot_line_item(line_item, order_id):
             "to": {"id": order_id},
             "types": [{
                 "associationCategory": "HUBSPOT_DEFINED",
-                "associationTypeID": 514,
+                "associationTypeId": 514,
             }],
         }],
     }

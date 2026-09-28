@@ -1,10 +1,15 @@
 import json
 
-from transforms import transform_customer, transform_order
+from transforms import (
+    transform_customer,
+    transform_line_item,
+    transform_order,
+)
 
 from hubspot_client import (
     create_hubspot_contact,
     create_hubspot_order,
+    create_hubspot_line_item,
     find_hubspot_contact_by_email,
     find_hubspot_order_by_external_id,
 )
@@ -58,16 +63,35 @@ def main():
     
    # 1.7 Reuse existing Order or create a new Order
     if existing_order:
+        hubspot_order_id = existing_order["id"]
         print(
-            "Existing HubSpot Order found:",            existing_order["id"],
+            "Existing HubSpot Order found:", existing_order["id"],
         )
     else:
         created_order = create_hubspot_order(hubspot_order)
+        hubspot_order_id = created_order["id"]
 
         print(
             "New HubSpot Order created:",
             created_order["id"],
         )
+        
+#1.8 Create and associate Line Items
+
+    # 1.8 Create and associate Line Items
+    for item in order["line_items"]:
+        hubspot_line_item = transform_line_item(item)
+
+        created_line_item = create_hubspot_line_item(
+            hubspot_line_item,
+            hubspot_order_id,
+        )
+
+        print(
+            "HubSpot Line Item created:",
+            created_line_item["id"],
+        )
+        
 
 # ============================================================
 # 2. PROGRAM ENTRY POINT
