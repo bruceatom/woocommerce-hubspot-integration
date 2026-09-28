@@ -27,5 +27,17 @@ def transform_order(order):
          "shipping_address": order["shipping_address"],
          "line_items": order["line_items"],
         }
-        
+
+# ==========================================================================================
+# 3. LINE ITEM TRANSFORMATION
+# ==========================================================================================
+
+# 3.1 Convert source Line Item fields to HubSpot field names
+
+def transform_line_item(item):
+    return {
+        "name": item["name"],
+        "quantity": item["quantity"],
+        "price": item["unit_price"],
+       }
                 

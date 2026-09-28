@@ -116,4 +116,32 @@ def create_hubspot_order(order):
            }
    }
        
+# ==========================================================================
+# 4. HUBSPOT LINE ITEM  OPERATIONS
+# ==========================================================================
 
+#4.1 Create Line Item and associate it with an Order
+def create_hubspot_line_item(line_item, order_id):
+    headers = get_hubspot_headers()
+    
+    payload = {
+        "properties": line_item,
+        "associations": [{
+            "to": {"id": order_id},
+            "types": [{
+                "associationCategory": "HUBSPOT_DEFINED",
+                "associationTypeID": 514,
+            }],
+        }],
+    }
+    
+    response = requests.post(
+        "https://api.hubapi.com/crm/objects/2026-09/line_items",
+        headers=headers,
+        json=payload,
+        timeout=10,
+    )
+
+    response.raise_for_status()
+
+    return response.json()
