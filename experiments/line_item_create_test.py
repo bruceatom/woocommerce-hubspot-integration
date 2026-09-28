@@ -24,54 +24,42 @@ headers = {
 
 
 # ============================================================
-# 2. LOAD SAMPLE LINE ITEM
+# 2. LOAD SAMPLE LINE ITEMS
 # ============================================================
 
 with open("sample_data/order.json") as file:
     data = json.load(file)
 
-first_item = data["order"]["line_items"][0]
+line_items = data["order"]["line_items"]
 
 
 # ============================================================
-# 3. TRANSFORM LINE ITEM
+# 3. TRANSFORM AND SEND LINE ITEMS
 # ============================================================
 
-hubspot_item = {
-    "name": first_item["name"],
-    "quantity": first_item["quantity"],
-    "price": first_item["unit_price"],
-}
+for item in line_items:
+    hubspot_item = {
+        "name": item["name"],
+        "quantity": item["quantity"],
+        "price": item["unit_price"],
+    }
 
-
-# ============================================================
-# 4. CREATE AND ASSOCIATE LINE ITEM
-# ============================================================
-
-payload = {
-    "properties": hubspot_item,
-    "associations": [{
-        "to": {
-            "id": ORDER_ID
-        },
-        "types": [{
-            "associationCategory": "HUBSPOT_DEFINED",
-            "associationTypeId": 514,
+    payload = {
+        "properties": hubspot_item,
+        "associations": [{
+            "to": {"id": ORDER_ID},
+            "types": [{
+                "associationCategory": "HUBSPOT_DEFINED",
+                "associationTypeId": 514,
+            }],
         }],
-    }],
-}
+    }
 
-response = requests.post(
-    LINE_ITEMS_URL,
-    headers=headers,
-    json=payload,
-    timeout=10,
-)
+    response = requests.post(
+        LINE_ITEMS_URL,
+        headers=headers,
+        json=payload,
+        timeout=10,
+    )
 
-
-# ============================================================
-# 5. RESULT
-# ============================================================
-
-print("Status:", response.status_code)
-print("Response:", response.text)
+    print(item["name"], "=>", response.status_code)
