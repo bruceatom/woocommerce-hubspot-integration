@@ -169,3 +169,36 @@ def create_hubspot_line_item(line_item, order_id):
     response.raise_for_status()
 
     return response.json()
+    
+# ==========================================================================
+# 5. HUBSPOT LINE ITEM  OPERATIONS
+# ==========================================================================
+
+# 5.1 Associate a Contact as the Order's Billing Contact
+
+def associate_billing_contact(contact_id, order_id):
+     headers = get_hubspot_headers()
+     
+     url = (
+         f"https://api.hubapi.com/crm/objects/2026-09/contacts/"
+         f"{contact_id}/associations/orders/{order_id}"
+    )
+    
+     payload = [
+         {
+             "associationCategory": "HUBSPOT_DEFINED",
+             "associationTypeId": 2695,
+         }
+    ]
+    
+     response = requests.put(
+        url,
+        headers=headers,
+        json=payload,
+        timeout=10,
+    )
+    
+     response.raise_for_status()
+    
+     return response.json()    
+          

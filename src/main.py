@@ -7,6 +7,7 @@ from transforms import (
 )
 
 from hubspot_client import (
+    associate_billing_contact,
     create_hubspot_contact,
     create_hubspot_order,
     create_hubspot_line_item,
@@ -43,14 +44,18 @@ def main():
 
     # 1.5 Reuse existing Contact or create a new Contact
     if existing_contact:
+        hubspot_contact_id = existing_contact["id"]
+        
         print(
             "Existing HubSpot contact found:",
-            existing_contact["id"],
+            hubspot_contact_id,
         )
     else:
         created_contact = create_hubspot_contact(
             hubspot_customer
         )
+        
+        hubspot_contact_id = created_contact["id"]
 
         print(
             "New HubSpot contact created:",
@@ -77,8 +82,16 @@ def main():
             created_order["id"],
         )
         
-    # 1.8 Create and associate Line Items
-
+    # 1.8 Associate Contact as Order Billing Contact
+    associate_billing_contact(
+         hubspot_contact_id,
+         hubspot_order_id,
+    )
+    
+    print ("Billing Contact associated with Order")
+    
+    # 1.9 Reuse existing Line Items or create new ones
+    
     for item in order["line_items"]:
        hubspot_line_item = transform_line_item(item)
        
