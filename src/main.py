@@ -1,5 +1,7 @@
 import json
 
+from receipts import write_run_receipt
+
 from transforms import (
     transform_customer,
     transform_line_item,
@@ -109,6 +111,17 @@ def main():
               hubspot_line_item,
               hubspot_order_id,
          )
+         
+    # 1.10 Reuse existing Line Items or create new ones        
+    
+    write_run_receipt({
+       "status": "success",
+       "woocommerce_order_id": order["id"],
+       "hubspot_contact_id": hubspot_contact_id,
+       "hubspot_order_id": hubspot_order_id,
+       })
+   
+    print("Run receipt written")
          
 # ============================================================
 # 2. PROGRAM ENTRY POINT
