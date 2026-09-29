@@ -12,6 +12,7 @@ from hubspot_client import (
     create_hubspot_line_item,
     find_hubspot_contact_by_email,
     find_hubspot_order_by_external_id,
+    find_hubspot_line_item_by_name,
 )
 
 
@@ -76,23 +77,26 @@ def main():
             created_order["id"],
         )
         
-#1.8 Create and associate Line Items
-
     # 1.8 Create and associate Line Items
+
     for item in order["line_items"]:
-        hubspot_line_item = transform_line_item(item)
-
-        created_line_item = create_hubspot_line_item(
-            hubspot_line_item,
-            hubspot_order_id,
-        )
-
-        print(
-            "HubSpot Line Item created:",
-            created_line_item["id"],
-        )
-        
-
+       hubspot_line_item = transform_line_item(item)
+       
+       existing_line_item = find_hubspot_line_item_by_name(
+           hubspot_line_item["name"]
+       )
+       
+       if existing_line_item:
+           print(
+                "Existing HubSpot Line Item found:",
+                existing_line_item["id"],
+          )
+       else:
+          create_line_item = create_hubspot_line_item(
+              hubspot_line_item,
+              hubspot_order_id,
+         )
+         
 # ============================================================
 # 2. PROGRAM ENTRY POINT
 # ============================================================

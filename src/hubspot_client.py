@@ -121,9 +121,33 @@ def create_hubspot_order(order):
 # ==========================================================================
 
 #4.1 Create Line Item and associate it with an Order
-def create_hubspot_line_item(line_item, order_id):
+
+def find_hubspot_line_item_by_name(name):
     headers = get_hubspot_headers()
     
+    response = requests.get(
+        "https://api.hubapi.com/crm/objects/2026-09/line_items",
+        headers=headers,
+        params={
+             "properties": "name",
+             "limit": 100,
+        },
+        timeout=10
+    )
+    
+    response.raise_for_status()
+    
+    for line_item in response.json()["results"]:
+        if line_item["properties"].get("name") == name:
+            return line_item
+    
+    return None
+    
+#4.2 Create Line Item and associate it with an Order
+
+def create_hubspot_line_item(line_item, order_id):
+    headers = get_hubspot_headers()
+           
     payload = {
         "properties": line_item,
         "associations": [{
